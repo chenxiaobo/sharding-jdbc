@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <contextName>logback</contextName>
+    <property name="log_max_size" value="100MB"/> <!-- 日志文件大小 -->
+    <property name="log.pattern" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) |-%-5level [%thread] %c [%L] -| %msg%n"/>
+    <property name="log_name" value="mejust-user"/>
+    <springProperty scope="context" name="log_path" source="logging.path" defaultValue="E://mejust/logs"/>
+    <!--输出到控制台-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+        <!--<level>ERROR</level>-->
+        <!--</filter>-->
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!--输出info级别日志到文件-->
+    <appender name="rollingFileInfo" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/${log_name}_info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/backup/${log_name}_info.%d{yyyy-MM-dd}[%i].log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${log_max_size}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+    </appender>
+
+    <!--输出error级别日志到文件-->
+    <appender name="rollingFileError" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_path}/${log_name}_error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/backup/${log_name}_error.%d{yyyy-MM-dd}[%i].log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <!-- 超过MB时，触发滚动策略 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${log_max_size}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!--异步到文件-->
+    <appender name="asyncFileAppenderInfo" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>500</queueSize>
+        <appender-ref ref="rollingFileInfo"/>
+    </appender>
+
+    <!--异步到文件-->
+    <appender name="asyncFileAppenderError" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>500</queueSize>
+        <appender-ref ref="rollingFileError"/>
+    </appender>
+
+
+    <!-- 下面配置一些第三方包的日志过滤级别，用于避免刷屏 -->
+    <logger name="com.netflix.discovery.shared.resolver.aws" level="WARN"/>
+    <logger name="org.dozer" level="WARN"/>
+
+
+    <!--打印控制台和输出到文件-->
+    <root level="info">
+        <appender-ref ref="console"/>
+        <appender-ref ref="asyncFileAppenderInfo"/>
+        <appender-ref ref="asyncFileAppenderError"/>
+    </root>
+
+</configuration>

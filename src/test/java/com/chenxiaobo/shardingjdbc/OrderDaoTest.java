@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Date;
+
 /**
  * @Title: OrderDaoTest
  * @Description: TODO
@@ -25,7 +27,7 @@ public class OrderDaoTest {
     @Test
     public void testInsert(){
 
-//        orderDao.save(1232413424L,1233243L);
+        orderDao.save(1232413429L,1233243L,new Date());
 
     }
 
